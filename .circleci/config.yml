@@ -1,68 +1,32 @@
 version: 2.1
-commands:
-  destroy_infrastructure:
-    steps:
-      - run:
-          name: Destroy env
-          command: |
-            aws cloudformation delete-stack --stack-name ${CIRCLE_WORKFLOW_ID}
-
-
 jobs:
-  deploy_infrastructure:
+  create_and_deploy_front_end:
     docker:
-     - image: amazon/aws-cli
-       auth:
-        username: $ubuntuID
-        password: $ubuntukey
-    steps:
-    - checkout
-    - run:
-        name: Create Backend
-        command: |
-            aws cloudformation deploy \
-              --template-file bucket.yml \
-              --stack-name "${CIRCLE_WORKFLOW_ID}" \
-              --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID}"
-      #- destroy_environment
-        #when: on_fail
-
-  configure_infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints: ["be:21:ae:6a:5e:7b:6f:ef:9b:cb:31:21:d4:69:93:bc"]
-        - run:  
-            name: Install dependencies
-            command: | #Install the dependencies
-              apk add --update ansible  
-        - run:
-            name: Execute playbook
-            command: |
-              ansible-playbook main.yml -i inventory.txt
+      - run: | #Create Bucket
+          aws cloudformation deploy \
+            --template-file bucket.yml \
+            --stack-name "${CIRCLE_WORKFLOW_ID}" \
+            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID}"
+      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID}" --delete #Sync local & bucket
 
-  smoketest:
+  promote_to_production:
     docker:
-      - image: circleci/node:13.8.0 
+      - image: amazon/aws-cli
     steps:
-        - run: apk add --update curl
-        - run:
-            name: smoke test.
-            command: |
-              URL="34.220.2.77:3000"
-              if curl -s --head ${URL} # test if website exists
-              then
-               return 0
-              else
-               return 1
-              fi
-              
+      - checkout
+      - run: | #interacts with CloudFront to change from Old Bucket to new
+          aws cloudformation deploy \
+            --template-file cloudformation.yml \
+            --stack-name cloudfront \
+            --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID}"
 
-workflows:
-  workflow:
-    - deploy_instance
-    - smoke_test
-        requires:
-          deploy_instance
+
+  workflows:
+    default:
+      jobs:
+        - create_and_deploy_front_end
+        - promote_to_production
+            requires: [create_and_deploy_front_end]
