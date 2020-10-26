@@ -5,7 +5,7 @@ jobs:
     docker:
     - image: amazon/aws-cli
       auth:
-         username: aur0nd
+         username: Aurond
          password: $SecretaccessKey
     steps:
       - checkout
