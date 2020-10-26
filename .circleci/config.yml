@@ -20,8 +20,8 @@ jobs:
     docker:
     - image: amazon/aws-cli
       auth:
-         username: $AccessKeyID
-         password: $SecretaccessKey
+         username: $AWS_ACCOUNT_ID
+         password: $AWS_SECRET_ACCESS_KEY
     steps:
       - checkout
       - run: | #interacts with CloudFront to change from Old Bucket to new
