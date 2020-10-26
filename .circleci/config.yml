@@ -19,6 +19,9 @@ jobs:
   promote_to_production:
     docker:
     - image: amazon/aws-cli
+      auth:
+         username: $AccessKeyID
+         password: $SecretaccessKey
     steps:
       - checkout
       - run: | #interacts with CloudFront to change from Old Bucket to new
