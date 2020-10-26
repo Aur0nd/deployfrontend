@@ -5,9 +5,6 @@ jobs:
   create_and_deploy_front_end:
     docker:
     - image: amazon/aws-cli
-      auth:
-         username: $AccessKeyID #ID key from AWS
-         password: $SecretaccessKey #Secret Key ID from AWS
     steps:
       - checkout
       - run: | #Create Bucket
