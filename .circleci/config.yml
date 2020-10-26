@@ -1,16 +1,13 @@
 version: 2.1
 
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
 
 jobs:
   create_and_deploy_front_end:
     docker:
     - image: amazon/aws-cli
       auth:
-         username: $AccessKeyID
-         password: $SecretaccessKey
+         username: $AccessKeyID #ID key from AWS
+         password: $SecretaccessKey #Secret Key ID from AWS
     steps:
       - checkout
       - run: | #Create Bucket
