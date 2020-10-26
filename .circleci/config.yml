@@ -1,6 +1,5 @@
 version: 2.1
 
-
 jobs:
   create_and_deploy_front_end:
     docker:
@@ -11,7 +10,7 @@ jobs:
           aws cloudformation deploy \
             --template-file bucket.yml \
             --stack-name stack-${CIRCLE_WORKFLOW_ID} \
-            --parameter-overrides entername="${CIRCLE_WORKFLOW_ID}" --region=us-west-2
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" --region=us-west-2
       - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID}" --delete #Sync local & bucket
 
   promote_to_production:
