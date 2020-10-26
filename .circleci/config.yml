@@ -3,6 +3,9 @@ jobs:
   create_and_deploy_front_end:
     docker:
       - image: amazon/aws-cli
+       auth:
+        username: $ubuntuID
+        password: $ubuntukey
     steps:
       - checkout
       - run: | #Create Bucket
@@ -31,3 +34,6 @@ workflows:
       - promote_to_production:
             requires: 
               - create_and_deploy_front_end
+
+
+
